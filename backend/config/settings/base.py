@@ -61,7 +61,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Base de datos (se sobreescribe en cada entorno)
 DATABASES = {
-    'default': env.db('DATABASE_URL')
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST', default='localhost'),
+        'PORT': env('DB_PORT', default='5432'),
+    }
 }
 
 # Custom user model (lo crearemos en el siguiente paso)
