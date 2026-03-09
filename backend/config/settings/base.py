@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     # Local apps (las iremos agregando)
     'apps.users',
     'apps.doctors',
+    'apps.schedules',
 ]
 
 MIDDLEWARE = [
