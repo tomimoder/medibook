@@ -6,7 +6,7 @@ from apps.schedules.models import Schedule
 from apps.schedules.serializers import ScheduleSerializer, AvailabilitySerializer
 from apps.doctors.models import Doctor
 from datetime import datetime, timedelta, date
-
+from apps.appointments.models import Appointment
 
 class ScheduleListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -87,6 +87,14 @@ class DoctorAvailabilityView(APIView):
         except Schedule.DoesNotExist:
             return Response({'date': date_param, 'slots': []})
         
+        # Obtener slots ya reservados
+        reserved = Appointment.objects.filter(
+            doctor = doctor,
+            date = query_date,
+        ).exclude(
+            status = Appointment.Status.CANCELLED
+        ).values_list('start_time', flat = True)
+        
         # Generar los slots disponibles
         slots = []
         current = datetime.combine(query_date, schedule.start_time)
@@ -94,7 +102,8 @@ class DoctorAvailabilityView(APIView):
         delta = timedelta(minutes=schedule.slot_duration)
 
         while current + delta <= end:
-            slots.append(current.time().strftime('%H:%M'))
+            if current.time() not in reserved:
+                slots.append(current.time().strftime('%H:%M'))
             current += delta
 
         return Response({'date': date_param, 'slots': slots})
